@@ -70,6 +70,10 @@ abstract class Wechat implements GatewayInterface
         if ($endpoint = $this->user_config->get('endpoint_url')) {
             $this->endpoint = $endpoint;
         }
+
+        if ($subMchId = $this->user_config->get('sub_mch_id')) {
+            $this->config['sub_mch_id'] = $subMchId;
+        }
     }
 
     /**
