@@ -57,6 +57,10 @@ class Wechat implements GatewayApplicationInterface
             'trade_type'       => '',
             'spbill_create_ip' => Request::createFromGlobals()->getClientIp(),
         ];
+
+        if ($subMchId = $this->config->get('sub_mch_id', null)) {
+            $this->payload['sub_mch_id'] = $subMchId;
+        }
     }
 
     /**
