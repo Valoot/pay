@@ -194,6 +194,10 @@ class Support
                 self::getInstance()->baseUri = 'https://apihk.mch.weixin.qq.com/';
                 break;
 
+            case 'hk_wallet':
+                self::getInstance()->baseUri = 'https://mchapi.wechatpay.com.hk/cgi-bin/';
+                break;
+
             default:
                 break;
         }

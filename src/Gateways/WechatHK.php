@@ -10,6 +10,7 @@ namespace Yansongda\Pay\Gateways;
 
 
 use Yansongda\Pay\Contracts\GatewayApplicationInterface;
+use Yansongda\Pay\Gateways\Wechat\Support;
 use Yansongda\Supports\Config;
 
 class WechatHK extends Wechat implements GatewayApplicationInterface
@@ -22,6 +23,6 @@ class WechatHK extends Wechat implements GatewayApplicationInterface
     {
         parent::__construct($config);
 
-        $this->gateway = 'https://mchapi.wechatpay.com.hk/cgi-bin/';
+        $this->gateway = Support::baseUri('hk_wallet');
     }
 }

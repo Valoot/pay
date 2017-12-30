@@ -9,9 +9,10 @@
 namespace Yansongda\Pay\Gateways\WechatHK;
 
 
+use Yansongda\Pay\Gateways\Wechat\Gateway;
 use Yansongda\Supports\Collection;
 
-class PosGateway extends \Yansongda\Pay\Gateways\Wechat\PosGateway
+class PosGateway extends Gateway
 {
     /**
      * @param string $endpoint
@@ -26,4 +27,15 @@ class PosGateway extends \Yansongda\Pay\Gateways\Wechat\PosGateway
         return $this->preOrder('ia_mch_qr_auth.cgi', $payload);
     }
 
+    /**
+     * Get trade type config.
+     *
+     * @author yansongda <me@yansongda.cn>
+     *
+     * @return string
+     */
+    protected function getTradeType()
+    {
+        return '';
+    }
 }
