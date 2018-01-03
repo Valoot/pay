@@ -13,6 +13,7 @@ use Yansongda\Pay\Contracts\GatewayApplicationInterface;
 use Yansongda\Pay\Gateways\Alipay\Support;
 use Yansongda\Supports\Collection;
 use Yansongda\Supports\Config;
+use Yansongda\Supports\Str;
 
 class AlipayHK extends Alipay implements GatewayApplicationInterface
 {
@@ -40,6 +41,7 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
             '_input_charset' => 'UTF-8',
             // use MD5 sign type for alipay hk wallet
             'sign_type' => 'MD5',
+            'timestamp' => time(),
         ]);
     }
 
