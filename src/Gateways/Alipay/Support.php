@@ -184,6 +184,10 @@ class Support
                 self::getInstance()->baseUri = 'https://openapi.alipaydev.com/gateway.do';
                 break;
 
+            case 'hk_wallet':
+                self::getInstance()->baseUri = 'https://mapi-hk.alipay.com/gateway.do';
+                break;
+
             default:
                 break;
         }
