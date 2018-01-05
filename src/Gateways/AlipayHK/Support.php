@@ -35,13 +35,16 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
             throw new InvalidSignException('Alipay Sign Verify FAILED', 3, $data);
         }
 
-        if (!isset($data['response']['alipay']['result_code'])) {
+        if (isset($data['response']['alipay']['result_code']) && $data['response']['alipay']['result_code'] === 'SUCCESS') {
             return new Collection($data['response']['alipay']);
         }
 
         throw new GatewayException(
-            'Get Alipay API Error:'.$data['response']['alipay']['detail_error_des'].' - '.$data['response']['alipay']['display_message'],
-            $data['response']['alipay']['detail_error_code'],
+            'Get Alipay API Error:'.
+            (array_key_exists('detail_error_des', $data['response']['alipay']) ? $data['response']['alipay']['detail_error_des'] : $data['response']['alipay']['error'])
+            .' - '.
+            (array_key_exists('display_message', $data['response']['alipay']) ? $data['response']['alipay']['display_message'] : $data['response']['alipay']['error']),
+            array_key_exists('detail_error_code', $data['response']['alipay']) ? $data['response']['alipay']['detail_error_code'] : $data['response']['alipay']['error'],
             $data
         );
     }
