@@ -10,7 +10,8 @@ namespace Yansongda\Pay\Gateways;
 
 
 use Yansongda\Pay\Contracts\GatewayApplicationInterface;
-use Yansongda\Pay\Gateways\Alipay\Support;
+use Yansongda\Pay\Exceptions\GatewayException;
+use Yansongda\Pay\Gateways\AlipayHK\Support;
 use Yansongda\Supports\Collection;
 use Yansongda\Supports\Config;
 use Yansongda\Supports\Str;

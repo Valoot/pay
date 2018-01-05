@@ -9,7 +9,6 @@
 namespace Yansongda\Pay\Gateways\AlipayHK;
 
 
-use Yansongda\Pay\Gateways\AlipayHK\Support;
 use Yansongda\Pay\Log;
 use Yansongda\Supports\Collection;
 
