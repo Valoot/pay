@@ -40,11 +40,7 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
         }
 
         throw new GatewayException(
-            'Get Alipay API Error:'.
-            (array_key_exists('detail_error_des', $data['response']['alipay']) ? $data['response']['alipay']['detail_error_des'] : $data['response']['alipay']['error'])
-            .' - '.
-            (array_key_exists('display_message', $data['response']['alipay']) ? $data['response']['alipay']['display_message'] : $data['response']['alipay']['error']),
-            array_key_exists('detail_error_code', $data['response']['alipay']) ? $data['response']['alipay']['detail_error_code'] : $data['response']['alipay']['error'],
+            'Get Alipay API error, please check raw data for further information.',
             $data
         );
     }
