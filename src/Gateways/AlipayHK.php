@@ -76,5 +76,16 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
         return Support::requestApi($this->payload, $this->config->get('md5_key'));
     }
 
+    public function refund($order): Collection
+    {
+        $this->payload['service'] = 'alipay.acquire.overseas.spot.refund';
+
+        dd($this->payload);
+
+        $this->payload['sign'] = Support::generateSign($this->payload, $this->config->get('md5_key'));
+
+
+    }
+
 
 }
