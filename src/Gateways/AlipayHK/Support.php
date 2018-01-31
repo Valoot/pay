@@ -41,7 +41,8 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
 
         throw new GatewayException(
             'Get Alipay API error, please check raw data for further information.',
-            $data
+            $data,
+            json_encode($data)
         );
     }
 
