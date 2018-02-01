@@ -29,6 +29,10 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
 
         $data = self::getInstance()->post('', $data);
 
+        if (array_has($data, 'is_success') && $data['is_success'] === 'F') {
+            throw new InvalidSignException('Alipay Error', 3, $data);
+        }
+
         if (!self::verifySign($data['response']['alipay'], $publicKey, true, $data['sign'])) {
             Log::warning('Alipay Sign Verify FAILED', $data);
 
