@@ -71,7 +71,7 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
 
         $this->payload['sign'] = Support::generateSign($this->payload, $this->config->get('md5_key'));
 
-        Log::debug('Find An Order:', [$this->gateway, $this->payload]);
+        \Log::debug('Find An Order:', [$this->gateway, $this->payload]);
 
         return Support::requestApi($this->payload, $this->config->get('md5_key'));
     }
