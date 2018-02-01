@@ -66,10 +66,16 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
         if (is_array($order)) {
             $this->payload = array_merge($this->payload, $order);
         } else {
-            $this->payload['out_trade_no'] = $order;
+            $this->payload['partner_trans_id'] = $order;
         }
 
-        $this->payload['sign'] = Support::generateSign($this->payload, $this->config->get('md5_key'));
+        unset(
+            $this->payload['return_url'],
+            $this->payload['notify_url'],
+            $this->payload['timestamp']
+        );
+
+        $this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $this->config->get('md5_key'));
 
         \Log::debug('Find An Order:', [$this->gateway, $this->payload]);
 
