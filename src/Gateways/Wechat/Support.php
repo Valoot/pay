@@ -66,7 +66,7 @@ class Support
             ($certClient !== null && $certKey !== null) ? ['cert' => $certClient, 'ssl_key' => $certKey] : []
         );
 
-        $result = self::fromXml($result);
+        $result = is_array($result) ? $result : self::fromXml($result);
 
         if (!isset($result['return_code']) || $result['return_code'] != 'SUCCESS' || $result['result_code'] != 'SUCCESS') {
             throw new GatewayException(
@@ -74,8 +74,6 @@ class Support
                 20000,
                 $result
             );
-
-            return new Collection($result);
         }
 
         if (self::generateSign($result, $key) === $result['sign']) {
