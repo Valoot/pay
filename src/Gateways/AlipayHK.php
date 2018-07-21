@@ -93,9 +93,21 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
 	 */
 	public function cancel($order): Collection
 	{
-		$this->payload['method'] = 'alipay.acquire.cancel';
-		$this->payload['biz_content'] = json_encode(is_array($order) ? $order : ['out_trade_no' => $order]);
-		$this->payload['sign'] = Support::generateSign($this->payload, $this->config->get('md5_key'));
+		$this->payload['service'] = 'alipay.acquire.cancel';
+
+		if (is_array($order)) {
+			$this->payload = array_merge($this->payload, $order);
+		} else {
+			$this->payload['out_trade_no'] = $order;
+		}
+
+		unset(
+			$this->payload['return_url'],
+			$this->payload['notify_url'],
+			$this->payload['timestamp']
+		);
+
+		$this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $this->config->get('md5_key'));
 
 		\Log::debug('Cancel An Order:', [$this->gateway, $this->payload]);
 
