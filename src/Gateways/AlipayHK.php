@@ -97,7 +97,7 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
 		$this->payload['biz_content'] = json_encode(is_array($order) ? $order : ['out_trade_no' => $order]);
 		$this->payload['sign'] = Support::generateSign($this->payload, $this->config->get('md5_key'));
 
-		Log::debug('Cancel An Order:', [$this->gateway, $this->payload]);
+		\Log::debug('Cancel An Order:', [$this->gateway, $this->payload]);
 
 		return Support::requestApi($this->payload, $this->config->get('md5_key'));
 	}
