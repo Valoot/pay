@@ -50,7 +50,7 @@ class WechatHK extends Wechat implements GatewayApplicationInterface
             $this->payload['out_trade_no'] = $order;
         }
 
-        unset($this->payload['notify_url'], $this->payload['trade_type'], $this-payload['spbill_create_ip']);
+        unset($this->payload['notify_url'], $this->payload['trade_type'], $this->payload['spbill_create_ip']);
 
         $this->payload['sign'] = Support::generateSign($this->payload, $this->config->get('key'));
 
