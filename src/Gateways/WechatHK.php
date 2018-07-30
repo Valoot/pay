@@ -54,7 +54,7 @@ class WechatHK extends Wechat implements GatewayApplicationInterface
 
         $this->payload['sign'] = Support::generateSign($this->payload, $this->config->get('key'));
 
-        return Support::requestApi('ia_mch_qr_order_revoke.cgi', $this->payload, $this->config->get('key'));
+        return Support::requestApi('api/ia_mch_qr_order_revoke.cgi', $this->payload, $this->config->get('key'));
     }
 
     public function refund($order): Collection
