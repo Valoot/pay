@@ -5,6 +5,7 @@ namespace Yansongda\Pay\Gateways\Wechat;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Yansongda\Supports\Str;
+use Yansongda\Supports\Collection;
 
 class AppGateway extends Gateway
 {
@@ -16,11 +17,11 @@ class AppGateway extends Gateway
      * @param string $endpoint
      * @param array  $payload
      *
-     * @return Response
+     * @return Collection
      */
-    public function pay($endpoint, array $payload): Response
+    public function pay($endpoint, array $payload): Collection
     {
-        $payload['appid'] = $this->config->get('appid');
+        $payload['appid'] = $this->config->get('app_id');
         $payload['trade_type'] = $this->getTradeType();
 
         $payRequest = [
@@ -35,7 +36,7 @@ class AppGateway extends Gateway
 
         Log::debug('Paying An App Order:', [$endpoint, $payRequest]);
 
-        return JsonResponse::create($payRequest);
+        return new Collection($payRequest);
     }
 
     /**
