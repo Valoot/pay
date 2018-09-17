@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Yansongda\Supports\Str;
 use Yansongda\Supports\Collection;
+use Yansongda\Pay\Gateways\Wechat\Log;
 
 class AppGateway extends Gateway
 {
