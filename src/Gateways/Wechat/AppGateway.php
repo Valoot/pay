@@ -26,8 +26,8 @@ class AppGateway extends Gateway
         $payload['trade_type'] = $this->getTradeType();
 
         $payRequest = [
-            'appid'     => $payload['appid'],
-            'partnerid' => $payload['mch_id'],
+            'appid'     => $payload['sub_appid'],
+            'partnerid' => $payload['sub_mch_id'],
             'prepayid'  => $this->preOrder('pay/unifiedorder', $payload)->prepay_id,
             'timestamp' => strval(time()),
             'noncestr'  => Str::random(),
