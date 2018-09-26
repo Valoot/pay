@@ -23,6 +23,7 @@ class AppGateway extends Gateway
     public function pay($endpoint, array $payload): Collection
     {
         $payload['appid'] = $this->config->get('app_id');
+	    $payload['sub_appid'] = $this->config->get('sub_appid');
         $payload['trade_type'] = $this->getTradeType();
 
         $payRequest = [
