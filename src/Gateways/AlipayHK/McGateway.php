@@ -10,6 +10,7 @@ namespace Yansongda\Pay\Gateways\AlipayHK;
 
 
 use Yansongda\Pay\Contracts\GatewayInterface;
+use Yansongda\Pay\Log;
 use Yansongda\Supports\Collection;
 use Yansongda\Supports\Config;
 
