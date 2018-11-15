@@ -44,7 +44,7 @@ class McGateway implements GatewayInterface
 	{
 		$payload['service'] = $this->getMethod();
 		$payload['biz_type'] = $this->getProductCode();
-		$payload['biz_content'] = json_encode(json_decode($payload['biz_content'], true));
+		$payload['biz_data'] = json_encode(json_decode($payload['biz_data'], true));
 		$payload['sign'] = Support::generateSign(array_except($payload, ['sign_type', 'sign']), $this->config->get('md5_key'));
 
 		Log::debug('Paying A Scan Order:', [$endpoint, $payload]);
