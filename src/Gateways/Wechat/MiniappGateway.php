@@ -2,7 +2,9 @@
 
 namespace Yansongda\Pay\Gateways\Wechat;
 
+use Yansongda\Pay\Log;
 use Yansongda\Supports\Collection;
+use Yansongda\Supports\Str;
 
 class MiniappGateway extends MpGateway
 {
