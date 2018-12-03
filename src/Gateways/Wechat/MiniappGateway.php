@@ -18,9 +18,20 @@ class MiniappGateway extends MpGateway
      */
     public function pay($endpoint, array $payload): Collection
     {
-        $payload['appid'] = $this->config->get('miniapp_id');
-        $payload['trade_type'] = $this->getTradeType();
+	    $payload['trade_type'] = $this->getTradeType();
+	    $payload['appid'] = $this->config->get('miniapp_id');
 
-        return parent::pay($endpoint, $payload);
+	    $payRequest = [
+		    'appId'     => $payload['sub_appid'],
+		    'timeStamp' => strval(time()),
+		    'nonceStr'  => Str::random(),
+		    'package'   => 'prepay_id='.$this->preOrder('pay/unifiedorder', $payload)->prepay_id,
+		    'signType'  => 'MD5',
+	    ];
+	    $payRequest['paySign'] = Support::generateSign($payRequest, $this->config->get('key'));
+
+	    Log::debug('Paying A JSAPI Order:', [$endpoint, $payRequest]);
+
+	    return new Collection($payRequest);
     }
 }
