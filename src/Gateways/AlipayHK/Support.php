@@ -62,4 +62,63 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
 
         return $sign === $toBeVerified;
     }
+
+    /**
+     * Generate sign.
+     *
+     * @author yansongda <me@yansongda.cn>
+     *
+     * @return string
+     */
+    public static function generateRSASign($parmas, $privateKey = null): string
+    {
+        if (is_null($privateKey)) {
+            throw new InvalidConfigException('Missing Alipay Config -- [private_key]', 1);
+        }
+
+        if (Str::endsWith($privateKey, '.pem')) {
+            $privateKey = openssl_pkey_get_private($privateKey);
+        } else {
+            $privateKey = "-----BEGIN RSA PRIVATE KEY-----\n".
+                wordwrap($privateKey, 64, "\n", true).
+                "\n-----END RSA PRIVATE KEY-----";
+        }
+
+        openssl_sign(self::getSignContent($parmas), $sign, $privateKey, OPENSSL_ALGO_SHA1);
+
+        return base64_encode($sign);
+    }
+
+    /**
+     * Verfiy sign.
+     *
+     * @author yansongda <me@yansonga.cn>
+     *
+     * @param array       $data
+     * @param string      $publicKey
+     * @param bool        $sync
+     * @param string|null $sign
+     *
+     * @return bool
+     */
+    public static function verifyRSASign($data, $publicKey = null, $sync = false, $sign = null): bool
+    {
+        if (is_null($publicKey)) {
+            throw new InvalidConfigException('Missing Alipay Config -- [ali_public_key]', 2);
+        }
+
+        if (Str::endsWith($publicKey, '.pem')) {
+            $publicKey = openssl_pkey_get_public($publicKey);
+        } else {
+            $publicKey = "-----BEGIN PUBLIC KEY-----\n".
+                wordwrap($publicKey, 64, "\n", true).
+                "\n-----END PUBLIC KEY-----";
+        }
+
+        $sign = $sign ?? $data['sign'];
+
+        $toVerify = $sync ? mb_convert_encoding(json_encode($data, JSON_UNESCAPED_UNICODE), 'gb2312', 'utf-8') : self::getSignContent($data, true);
+
+        return openssl_verify($toVerify, base64_decode($sign), $publicKey, OPENSSL_ALGO_SHA1) === 1;
+    }
 }

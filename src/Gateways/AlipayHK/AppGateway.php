@@ -34,14 +34,14 @@ class AppGateway implements GatewayInterface
     {
         $payload['service'] = $this->getMethod();
         $payload['seller_id'] = $this->config->get('partner_id');
+        $payload['sign_type'] = "RSA";
 
         unset($payload['return_url'], $payload['timestamp']);
 
-        $payload['sign'] = Support::generateSign(array_except($payload, ['sign_type', 'sign']), $this->config->get('md5_key'));
+        ksort($payload);
+        $payload['sign'] = urlencode(Support::generateRSASign(array_except($payload, ['sign_type', 'sign']), $this->config->get('rsa_key')));
 
         Log::debug('Paying A App Order:', [$endpoint, $payload]);
-
-        ksort($payload);
 
         return new Collection($payload);
     }
