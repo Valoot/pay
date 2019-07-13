@@ -79,22 +79,28 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
 
     public static function verifySign($data, $publicKey = null, $sync = false, $sign = null, $signType = "MD5"): bool
     {
-        $toBeVerified = "";
-        if ($signType == "MD5") {
-            $toBeVerified = md5(
-                mb_convert_encoding(
-                    urldecode(http_build_query($data)) . $publicKey,
-                    'gb2312',
-                    'utf-8'
-                )
-            );
-            return $sign === $toBeVerified;
+        switch ($signType) {
+            case "MD5":
+                return self::verifyMD5Sign($data, $publicKey, $sync, $sign);
+                break;
+            case "RSA":
+                return true; //TODO Verify with alipay public key
+                break;
+            default:
+                return false;
         }
+    }
 
-        if ($signType == "RSA") {//TODO Verify with alipay public key
-            return true;
-        }
-
+    private static function verifyMD5Sign($data, $publicKey = null, $sync = false, $sign = null)
+    {
+        $toBeVerified = md5(
+            mb_convert_encoding(
+                urldecode(http_build_query($data)) . $publicKey,
+                'gb2312',
+                'utf-8'
+            )
+        );
+        return $sign === $toBeVerified;
     }
 
     /**
