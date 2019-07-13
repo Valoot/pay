@@ -75,11 +75,24 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
             $this->payload['timestamp']
         );
 
-        $this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $this->config->get('md5_key'));
+        $key = "";
+
+        $this->config->get('rsa_key') != null ? $key = $this->config->get('rsa_key') : $key = $this->config->get('md5_key');
+        if ($this->config->get('rsa_key') != null) {
+            $this->payload['sign_type'] = "RSA";
+            $this->payload['service'] = "single_trade_query";
+            $this->payload['out_trade_no'] = $this->payload['partner_trans_id'];
+            unset($this->payload['partner_trans_id']);
+            $this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $key, $this->payload['sign_type']);
+        }
+
+        if ($this->config->get('rsa_key') == null) {
+            $this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $key);
+        }
 
         \Log::debug('Find An Order:', [$this->gateway, $this->payload]);
 
-        return Support::requestApi($this->payload, $this->config->get('md5_key'));
+        return Support::requestApi($this->payload, $key);
     }
 
 	/**
