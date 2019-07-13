@@ -61,7 +61,7 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
         /**
          * $dataToBeVerify refering data['response']['alipay'] or data['response']['trade']
          * $data['response']['trade'] is for app payment
-         * $data['response']['trade'] is for others
+         * $data['response']['alipay'] is for others
          */
         $dataToBeVerify = array_get($data['response'], 'alipay') != null ? $data['response']['alipay'] : $data['response']['trade'];
         if (!self::verifySign($dataToBeVerify, $publicKey, true, $data['sign'], $data['sign_type'])) {
