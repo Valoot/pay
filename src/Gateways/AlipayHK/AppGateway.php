@@ -39,7 +39,8 @@ class AppGateway implements GatewayInterface
 
         unset($payload['return_url'], $payload['timestamp']);
 
-        $payload['sign'] = urlencode(Support::generateSign(array_except($payload, ['sign_type', 'sign']), $this->config->get('rsa_key'), $payload['sign_type'],'"'));
+        ksort($payload);
+        $payload['sign'] = urlencode(Support::generateRSASign(array_except($payload, ['sign_type', 'sign']), $this->config->get('rsa_key'),'"'));
 
         Log::debug('Paying A App Order:', [$endpoint, $payload]);
 

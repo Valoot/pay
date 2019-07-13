@@ -32,19 +32,11 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
      *             _input_charset=UTF-8 [V] it is good
      * @return string
      */
-    public static function generateSign($parmas, $privateKey = null, $mode = "MD5", $separator = ""): string
+    public static function generateSign($parmas, $privateKey = null): string
     {
         ksort($parmas);
 
-        $sign = "";
-
-        if ($mode == "MD5") {
-            $sign = md5(urldecode(http_build_query($parmas)) . $privateKey);
-        }
-
-        if ($mode == "RSA") {
-            $sign = self::generateRSASign($parmas, $privateKey, $separator);
-        }
+        $sign = md5(urldecode(http_build_query($parmas)) . $privateKey);
 
         return $sign;
     }
@@ -112,7 +104,7 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
      *
      * @return string
      */
-    private static function generateRSASign($parmas, $privateKey = null, $separator): string
+    public static function generateRSASign($parmas, $privateKey = null, $separator = ""): string
     {
         if (is_null($privateKey)) {
             throw new InvalidConfigException('Missing Alipay Config -- [private_key]', 1);
