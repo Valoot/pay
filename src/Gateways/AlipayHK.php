@@ -75,9 +75,8 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
             $this->payload['timestamp']
         );
 
-        $key = "";
-
-        $this->config->get('rsa_key') != null ? $key = $this->config->get('rsa_key') : $key = $this->config->get('md5_key');
+        $key = $this->config->get('rsa_key') ?: $this->config->get('md5_key');
+        
         if ($this->config->get('rsa_key') != null) {
             $this->payload['sign_type'] = "RSA";
             $this->payload['service'] = "single_trade_query";
