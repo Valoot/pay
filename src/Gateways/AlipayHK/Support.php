@@ -74,7 +74,7 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
             return new Collection($data['response']['alipay']);
         }
 
-        if (isset($dataToBeVerify['trade_status']) && $dataToBeVerify['trade_status'] === 'TRADE_FINISHED') { //TODO There are other status also means success, need to confirm
+        if (isset($dataToBeVerify['trade_status'])) {
             return new Collection($data['response']['trade']);
         }
 
