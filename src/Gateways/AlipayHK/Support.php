@@ -13,14 +13,40 @@ use Yansongda\Pay\Exceptions\GatewayException;
 use Yansongda\Pay\Exceptions\InvalidSignException;
 use Yansongda\Pay\Log;
 use Yansongda\Supports\Collection;
+use Yansongda\Supports\Str;
 
 class Support extends \Yansongda\Pay\Gateways\Alipay\Support
 {
-    public static function generateSign($parmas, $privateKey = null): string
+    /**
+     * @param $parmas
+     * @param null $privateKey
+     * @param string $mode
+     * @param string $separator // While generating RSA Sign for App Payment, $separator should be "
+     *
+     * For Example _input_charset=UTF-8 [X] if pass this to Android SDK, It will return System Busy error.
+     *             _input_charset="UTF-8" [V] every value should wrap with "" and then sign with RSA, Sdk will become normal
+     *
+     * However, doing query with RSA Sign, the parameter value should not be wrapped with "
+     *
+     * For Example _input_charset="UTF-8" [X] it will return invalud sign error from alipay query api
+     *             _input_charset=UTF-8 [V] it is good
+     * @return string
+     */
+    public static function generateSign($parmas, $privateKey = null, $mode = "MD5", $separator = ""): string
     {
         ksort($parmas);
 
-        return md5(urldecode(http_build_query($parmas)) . $privateKey);
+        $sign = "";
+
+        if ($mode == "MD5") {
+            $sign = md5(urldecode(http_build_query($parmas)) . $privateKey);
+        }
+
+        if ($mode == "RSA") {
+            $sign = self::generateRSASign($parmas, $privateKey, $separator);
+        }
+
+        return $sign;
     }
 
     public static function requestApi($data, $publicKey): Collection
@@ -32,15 +58,24 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
         if (array_has($data, 'is_success') && $data['is_success'] === 'F') {
             throw new InvalidSignException('Alipay Error', 3, $data);
         }
-
-        if (!self::verifySign($data['response']['alipay'], $publicKey, true, $data['sign'])) {
+        /**
+         * $dataToBeVerify refering data['response']['alipay'] or data['response']['trade']
+         * $data['response']['trade'] is for app payment
+         * $data['response']['trade'] is for others
+         */
+        $dataToBeVerify = array_get($data['response'], 'alipay') != null ? $data['response']['alipay'] : $data['response']['trade'];
+        if (!self::verifySign($dataToBeVerify, $publicKey, true, $data['sign'], $data['sign_type'])) {
             Log::warning('Alipay Sign Verify FAILED', $data);
 
             throw new InvalidSignException('Alipay Sign Verify FAILED', 3, $data);
         }
 
-        if (isset($data['response']['alipay']['result_code']) && $data['response']['alipay']['result_code'] === 'SUCCESS') {
+        if (isset($dataToBeVerify['result_code']) && $dataToBeVerify['result_code'] === 'SUCCESS') {
             return new Collection($data['response']['alipay']);
+        }
+
+        if (isset($dataToBeVerify['trade_status']) && $dataToBeVerify['trade_status'] === 'TRADE_FINISHED') { //TODO There are other status also means success, need to confirm
+            return new Collection($data['response']['trade']);
         }
 
         throw new GatewayException(
@@ -50,17 +85,24 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
         );
     }
 
-    public static function verifySign($data, $publicKey = null, $sync = false, $sign = null): bool
+    public static function verifySign($data, $publicKey = null, $sync = false, $sign = null, $signType = "MD5"): bool
     {
-        $toBeVerified  = md5(
-            mb_convert_encoding(
-                urldecode(http_build_query($data)) . $publicKey,
-                'gb2312',
-                'utf-8'
-            )
-        );
+        $toBeVerified = "";
+        if ($signType == "MD5") {
+            $toBeVerified = md5(
+                mb_convert_encoding(
+                    urldecode(http_build_query($data)) . $publicKey,
+                    'gb2312',
+                    'utf-8'
+                )
+            );
+            return $sign === $toBeVerified;
+        }
 
-        return $sign === $toBeVerified;
+        if ($signType == "RSA") {//TODO Verify with alipay public key
+            return true;
+        }
+
     }
 
     /**
@@ -70,7 +112,7 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
      *
      * @return string
      */
-    public static function generateRSASign($parmas, $privateKey = null): string
+    private static function generateRSASign($parmas, $privateKey = null, $separator): string
     {
         if (is_null($privateKey)) {
             throw new InvalidConfigException('Missing Alipay Config -- [private_key]', 1);
@@ -79,12 +121,11 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
         if (Str::endsWith($privateKey, '.pem')) {
             $privateKey = openssl_pkey_get_private($privateKey);
         } else {
-            $privateKey = "-----BEGIN RSA PRIVATE KEY-----\n".
-                wordwrap($privateKey, 64, "\n", true).
+            $privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" .
+                wordwrap($privateKey, 64, "\n", true) .
                 "\n-----END RSA PRIVATE KEY-----";
         }
-
-        openssl_sign(self::getSignContent($parmas), $sign, $privateKey, OPENSSL_ALGO_SHA1);
+        openssl_sign(self::getSignContentForAppPayment($parmas, false, $separator), $sign, $privateKey, OPENSSL_ALGO_SHA1);
 
         return base64_encode($sign);
     }
@@ -94,9 +135,9 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
      *
      * @author yansongda <me@yansonga.cn>
      *
-     * @param array       $data
-     * @param string      $publicKey
-     * @param bool        $sync
+     * @param array $data
+     * @param string $publicKey
+     * @param bool $sync
      * @param string|null $sign
      *
      * @return bool
@@ -110,8 +151,8 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
         if (Str::endsWith($publicKey, '.pem')) {
             $publicKey = openssl_pkey_get_public($publicKey);
         } else {
-            $publicKey = "-----BEGIN PUBLIC KEY-----\n".
-                wordwrap($publicKey, 64, "\n", true).
+            $publicKey = "-----BEGIN PUBLIC KEY-----\n" .
+                wordwrap($publicKey, 64, "\n", true) .
                 "\n-----END PUBLIC KEY-----";
         }
 
@@ -120,5 +161,34 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
         $toVerify = $sync ? mb_convert_encoding(json_encode($data, JSON_UNESCAPED_UNICODE), 'gb2312', 'utf-8') : self::getSignContent($data, true);
 
         return openssl_verify($toVerify, base64_decode($sign), $publicKey, OPENSSL_ALGO_SHA1) === 1;
+    }
+
+    /**
+     * Get signContent that is to be signed.
+     *
+     * @author yansongda <me@yansongda.cn>
+     *
+     * @param array $toBeSigned
+     * @param bool $verify
+     *
+     * @return string
+     */
+    private static function getSignContentForAppPayment(array $toBeSigned, $verify = false, $separator): string
+    {
+        ksort($toBeSigned);
+
+        $stringToBeSigned = '';
+        foreach ($toBeSigned as $k => $v) {
+            if ($verify && $k != 'sign' && $k != 'sign_type') {
+                $stringToBeSigned .= $k . '=' . $separator . $v . $separator . '&';
+            }
+            if (!$verify && $v !== '' && !is_null($v) && $k != 'sign' && '@' != substr($v, 0, 1)) {
+                $stringToBeSigned .= $k . '=' . $separator . $v . $separator . '&';
+            }
+        }
+        $stringToBeSigned = substr($stringToBeSigned, 0, -1);
+        unset($k, $v);
+
+        return $stringToBeSigned;
     }
 }
