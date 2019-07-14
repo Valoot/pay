@@ -50,7 +50,7 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
     {
         $this->payload = array_merge($this->payload, $params);
 
-        $gateway = get_class($this).'\\'.Str::studly($gateway).'Gateway';
+        $gateway = get_class($this) . '\\' . Str::studly($gateway) . 'Gateway';
 
         if (class_exists($gateway)) {
             return $this->makePay($gateway);
@@ -76,57 +76,56 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
         );
 
         $key = $this->config->get('rsa_key') ?: $this->config->get('md5_key');
-        
+
         if ($this->config->get('rsa_key') != null) {
             $this->payload['sign_type'] = "RSA";
             $this->payload['service'] = "single_trade_query";
             $this->payload['out_trade_no'] = $this->payload['partner_trans_id'];
             unset($this->payload['partner_trans_id']);
             $this->payload['sign'] = Support::generateRSASign(array_except($this->payload, ['sign_type', 'sign']), $key);
+            return Support::requestApi($this->payload, $key);
         }
 
-        if ($this->config->get('rsa_key') == null) {
-            $this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $key);
-        }
+        $this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $key);
 
         \Log::debug('Find An Order:', [$this->gateway, $this->payload]);
 
         return Support::requestApi($this->payload, $key);
     }
 
-	/**
-	 * Cancel an order.
-	 *
-	 * @author yansongda <me@yansongda.cn>
-	 *
-	 * @param string|array $order
-	 *
-	 * @return Collection
-	 */
-	public function cancel($order): Collection
-	{
-		$this->payload['service'] = 'alipay.acquire.cancel';
+    /**
+     * Cancel an order.
+     *
+     * @author yansongda <me@yansongda.cn>
+     *
+     * @param string|array $order
+     *
+     * @return Collection
+     */
+    public function cancel($order): Collection
+    {
+        $this->payload['service'] = 'alipay.acquire.cancel';
 
-		if (is_array($order)) {
-			$this->payload = array_merge($this->payload, $order);
-		} else {
-			$this->payload['out_trade_no'] = $order;
-		}
+        if (is_array($order)) {
+            $this->payload = array_merge($this->payload, $order);
+        } else {
+            $this->payload['out_trade_no'] = $order;
+        }
 
-		unset(
-			$this->payload['return_url'],
-			$this->payload['notify_url'],
-			$this->payload['timestamp']
-		);
+        unset(
+            $this->payload['return_url'],
+            $this->payload['notify_url'],
+            $this->payload['timestamp']
+        );
 
-		$this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $this->config->get('md5_key'));
+        $this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $this->config->get('md5_key'));
 
-		\Log::debug('Cancel An Order:', [$this->gateway, $this->payload]);
+        \Log::debug('Cancel An Order:', [$this->gateway, $this->payload]);
 
-		return Support::requestApi($this->payload, $this->config->get('md5_key'));
-	}
+        return Support::requestApi($this->payload, $this->config->get('md5_key'));
+    }
 
-	public function refund($order): Collection
+    public function refund($order): Collection
     {
         $this->payload['service'] = 'alipay.acquire.overseas.spot.refund';
         $this->payload = array_merge($this->payload, $order);
