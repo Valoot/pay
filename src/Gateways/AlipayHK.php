@@ -142,8 +142,7 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
             $this->payload['reason'] = 'test';
             $this->payload['out_return_no'] = $this->payload['partner_refund_id'];
             $this->payload['return_amount'] = $this->payload['refund_amount'];
-            $this->payload['notify_url'] = 'http://fb3077b2.ngrok.io/v1/transactions/callback';
-            unset($this->payload['partner_trans_id'], $this->payload['timestamp'], $this->payload['partner_refund_id'], $this->payload['refund_amount']);
+            unset($this->payload['partner_trans_id'], $this->payload['timestamp'], $this->payload['partner_refund_id'], $this->payload['refund_amount'], $this->payload['notify_url']);
             $this->payload['sign'] = Support::generateRSASign(array_except($this->payload, ['sign_type', 'sign']), $key);
             return Support::requestApi($this->payload, $key);
         }
