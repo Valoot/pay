@@ -132,11 +132,27 @@ class AlipayHK extends Alipay implements GatewayApplicationInterface
 
         unset($this->payload['return_url']);
 
-        $this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $this->config->get('md5_key'));
+        $key = $this->config->get('rsa_key') ?: $this->config->get('md5_key');
 
-        ksort($this->payload);
+        if ($this->config->get('rsa_key') != null) {
+            $this->payload['sign_type'] = 'RSA';
+            $this->payload['service'] = 'forex_refund';
+            $this->payload['out_trade_no'] = $this->payload['partner_trans_id'];
+            $this->payload['currency'] = $order['currency'];
+            $this->payload['reason'] = 'test';
+            $this->payload['out_return_no'] = $this->payload['partner_refund_id'];
+            $this->payload['return_amount'] = $this->payload['refund_amount'];
+            $this->payload['notify_url'] = 'http://fb3077b2.ngrok.io/v1/transactions/callback';
+            unset($this->payload['partner_trans_id'], $this->payload['timestamp'], $this->payload['partner_refund_id'], $this->payload['refund_amount']);
+            $this->payload['sign'] = Support::generateRSASign(array_except($this->payload, ['sign_type', 'sign']), $key);
+            return Support::requestApi($this->payload, $key);
+        }
 
-        return Support::requestApi($this->payload, $this->config->get('md5_key'));
+        $this->payload['sign'] = Support::generateSign(array_except($this->payload, ['sign_type', 'sign']), $key);
+
+        \Log::debug('Find An Order:', [$this->gateway, $this->payload]);
+
+        return Support::requestApi($this->payload, $key);
     }
 
 
