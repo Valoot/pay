@@ -52,14 +52,12 @@ class Support extends \Yansongda\Pay\Gateways\Alipay\Support
         if (array_has($data, 'is_success') && $data['is_success'] === 'F') {
             throw new InvalidSignException('Alipay Error', 3, $data);
         }
-
         /**
          * for alipay app payment refund
          */
         if ($service == 'forex_refund' && $data['is_success'] === 'T') {
             return new Collection(['refund_amount' => $refundAmount]);
         }
-
         /**
          * $dataToBeVerify refering data['response']['alipay'] or data['response']['trade']
          * $data['response']['trade'] is for app payment
