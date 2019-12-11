@@ -35,7 +35,7 @@ class WapGateway implements GatewayInterface
         $payload['service'] = $this->getMethod();
         $payload['sign_type'] = "RSA";
 
-        unset($payload['return_url'], $payload['timestamp'], $payload['notify_url'], $payload['payment_inst'], $payload['secondary_merchant_id'], $payload['trade_information']);
+        unset($payload['timestamp'], $payload['notify_url'] , $payload['trade_information']);
         ksort($payload);
         $payload['sign'] = Support::generateRSASign(array_except($payload, ['sign_type', 'sign']), $this->config->get('rsa_key'));
 
